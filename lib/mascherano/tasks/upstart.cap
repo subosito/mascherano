@@ -23,7 +23,7 @@ namespace :upstart do
     on roles(:app) do
       cmd_sq  = cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
       cmd_sq += ' || '
-      cmd_sq += cmd(fetch(:upstart_service), 'stop', fetch(:upstart_sudo))
+      cmd_sq += cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
 
       execute cmd_sq
     end
