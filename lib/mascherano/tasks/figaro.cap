@@ -1,0 +1,54 @@
+namespace :figaro do
+  desc <<-DESC
+    Upload application config to the server
+
+    You can override any of these defaults by setting the variables shown below.
+
+    set :figaro_target, -> { shared_path.join('application.yml') }
+    set :figaro_config, -> { release_path.join('config', 'application.yml') }
+    set :figaro_to_env, false
+  DESC
+  task :upload do
+    on roles(:app) do
+      figaro_stage = fetch(:stage)
+      figaro_tmp   = "figaro-#{figaro_stage}"
+
+      run_locally do
+        if fetch(:figaro_to_env)
+          figaro_cmd = %Q(Figaro.vars("#{figaro_stage}").split)
+        else
+          figaro_cmd = %Q(Figaro.env("#{figaro_stage}").to_yaml)
+        end
+
+        execute :bundle, "exec rails runner 'puts #{figaro_cmd}' > #{figaro_tmp}"
+      end
+
+      upload! figaro_tmp, fetch(:figaro_target), via: :scp
+
+      run_locally do
+        execute :rm, figaro_tmp
+      end
+    end
+  end
+
+  desc <<-DESC
+    Symlink the application config to the release_path
+  DESC
+  task :symlink do
+    on roles(:app) do
+      execute :ln, "-sf #{fetch(:figaro_target)} #{fetch(:figaro_config)}"
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :figaro_target, -> { shared_path.join('application.yml') }
+    set :figaro_config, -> { release_path.join('config', 'application.yml') }
+    set :figaro_to_env, false
+  end
+end
+
+namespace :deploy do
+  after :updating, 'figaro:symlink'
+end
