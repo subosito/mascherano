@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["subosito@gmail.com"]
   spec.description   = %q{Capistrano 3.x recipes}
   spec.summary       = %q{Capistrano 3.x recipes}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/subosito/mascherano"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
