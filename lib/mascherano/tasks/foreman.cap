@@ -1,0 +1,54 @@
+namespace :foreman do
+  desc <<-DESC
+    Export the Procfile to upstart.
+
+    You can override any of these defaults by setting the variables shown below.
+
+    set :foreman_format,      "upstart"
+    set :foreman_location,    "/etc/init"
+    set :foreman_port,        5000
+    set :foreman_root,        -> { release_path }
+    set :foreman_procfile,    -> { release_path.join('Procfile') }
+    set :foreman_app,         -> { fetch(:application) }
+    set :foreman_user,        -> { fetch(:user) }
+    set :foreman_log,         -> { shared_path.join('log') }
+    set :foreman_concurrency, false
+  DESC
+
+  task :export do
+    on roles(:all) do
+      within release_path do
+        concurrency = fetch(:foreman_concurrency)
+
+        args  = []
+        args << %Q(-f #{fetch(:foreman_procfile)})
+        args << %Q(-p #{fetch(:foreman_port)})
+        args << %Q(-d #{fetch(:foreman_root)})
+        args << %Q(-a #{fetch(:foreman_app)})
+        args << %Q(-u #{fetch(:foreman_user)})
+        args << %Q(-l #{fetch(:foreman_log)})
+        args << %Q(-c #{concurrency}) if concurrency
+
+        execute :foreman, "export #{args.join(' ')}"
+      end
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :foreman_format,      "upstart"
+    set :foreman_location,    "/etc/init"
+    set :foreman_port,        5000
+    set :foreman_root,        -> { release_path }
+    set :foreman_procfile,    -> { release_path.join('Procfile') }
+    set :foreman_app,         -> { fetch(:application) }
+    set :foreman_user,        -> { fetch(:user) }
+    set :foreman_log,         -> { shared_path.join('log') }
+    set :foreman_concurrency, false
+  end
+end
+
+namespace :deploy do
+  after :updating, 'foreman:export'
+end

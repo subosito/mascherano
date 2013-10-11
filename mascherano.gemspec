@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Mascherano::VERSION
   spec.authors       = ["Alif Rachmawadi"]
   spec.email         = ["subosito@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Capistrano 3.x recipes}
+  spec.summary       = %q{Capistrano 3.x recipes}
   spec.homepage      = ""
   spec.license       = "MIT"
 
