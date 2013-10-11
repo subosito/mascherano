@@ -13,12 +13,14 @@ namespace :foreman do
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
     set :foreman_concurrency, false
+    set :foreman_sudo,        false
   DESC
 
   task :export do
     on roles(:all) do
       within release_path do
         concurrency = fetch(:foreman_concurrency)
+        sudo        = fetch(:foreman_sudo)
 
         args  = [fetch(:foreman_format), fetch(:foreman_location)]
         args << %Q(-f #{fetch(:foreman_procfile)})
@@ -29,7 +31,13 @@ namespace :foreman do
         args << %Q(-l #{fetch(:foreman_log)})
         args << %Q(-c #{concurrency}) if concurrency
 
-        execute :foreman, "export #{args.join(' ')}"
+        cmd = "foreman export #{args.join(' ')}"
+
+        if sudo
+          execute "sudo su - -c '#{cmd}'"
+        else
+          execute cmd
+        end
       end
     end
   end
@@ -46,6 +54,7 @@ namespace :load do
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
     set :foreman_concurrency, false
+    set :foreman_sudo,        false
   end
 end
 
