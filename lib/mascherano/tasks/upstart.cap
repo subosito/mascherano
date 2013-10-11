@@ -19,7 +19,7 @@ namespace :upstart do
   end
 
   desc "Restart the application services"
-  task :start do
+  task :restart do
     on roles(:app) do
       cmd_sq  = cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
       cmd_sq += ' || '
