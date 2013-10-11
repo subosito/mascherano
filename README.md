@@ -1,3 +1,5 @@
+![Logo](img/mascherano-logo.png)
+
 # Mascherano
 
 TODO: Write a gem description
