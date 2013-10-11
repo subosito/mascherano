@@ -1,0 +1,37 @@
+namespace :go do
+  desc <<-DESC
+    Compile the go application locally
+
+    You can override any of these defaults by setting the variables shown below.
+
+    set :go_input,  "api.go"
+    set :go_output, "api"
+    set :go_target, -> { release_path.join(fetch(:go_output)) }
+  DESC
+  task :compile do
+    on roles(:app) do
+      run_locally do
+        execute :go, "build -o #{fetch(:go_output)} #{fetch(:go_input)}"
+      end
+    end
+  end
+
+  desc <<-DESC
+    Upload compiled application to the server
+  DESC
+  task :upload do
+    on roles(:app) do
+      go_output = fetch(:go_output)
+      go_target = fetch(:go_target_path).join(go_output)
+      upload! go_output, go_target, via: :scp
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :go_input,  "api.go"
+    set :go_output, "api"
+    set :go_target_path, -> { release_path }
+  end
+end
