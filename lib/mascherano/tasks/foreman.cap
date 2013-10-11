@@ -20,7 +20,7 @@ namespace :foreman do
       within release_path do
         concurrency = fetch(:foreman_concurrency)
 
-        args  = []
+        args  = [fetch(:foreman_format), fetch(:foreman_location)]
         args << %Q(-f #{fetch(:foreman_procfile)})
         args << %Q(-p #{fetch(:foreman_port)})
         args << %Q(-d #{fetch(:foreman_root)})
