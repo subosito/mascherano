@@ -1,0 +1,8 @@
+namespace :noscm do
+  task :check do; end
+  task :create_release do
+    on roles(:all) do
+      execute :mkdir, '-p', release_path
+    end
+  end
+end

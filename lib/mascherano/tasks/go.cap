@@ -8,7 +8,7 @@ namespace :go do
     set :go_output, "api"
     set :go_target, -> { release_path.join(fetch(:go_output)) }
   DESC
-  task :compile do
+  task :build do
     on roles(:app) do
       run_locally do
         execute :go, "build -o #{fetch(:go_output)} #{fetch(:go_input)}"
