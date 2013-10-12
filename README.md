@@ -24,15 +24,27 @@ Or install it yourself as:
 $ gem install mascherano
 ```
 
-## Usage
+## Recipes
 
 Mascherano currently have several recipes:
 
-1. env
-2. figaro
-3. foreman
-4. go
-5. upstart
+| recipe         | description                                                                                           |
+|----------------|-------------------------------------------------------------------------------------------------------|
+| __env__        | Manage application configuration on `.env` file                                                       |
+| __foreman__    | Manage Procfile application for [Foreman](http://ddollar.github.io/foreman)                           |
+| __figaro__     | Manage configuration, usually `application.yml` for [Figaro](https://github.com/laserlemon/figaro)    |
+| __go__         | Manage and ability to deploy go application                                                           |
+| __upstart__    | Manage application management using Upstart                                                           |
+| _more to come_ | _pull request are welcome ;)_                                                                         |
+
+This package also provides a `noscm` recipe for when you don't need source code on your deployment box (usually application already compiled).
+
+```ruby
+# deploy.rb
+set :application, 'mascherano'
+set :scm, :noscm
+```
+## Usage
 
 Make sure you have `Capfile` in the root of your project, so you can add these lines (choose which one you're using):
 
