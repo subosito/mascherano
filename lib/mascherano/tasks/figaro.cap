@@ -11,7 +11,7 @@ namespace :figaro do
     set :figaro_to_env, false
   DESC
   task :upload do
-    on roles(:app) do
+    on roles(fetch(:figaro_roles)) do
       figaro_stage = fetch(:stage)
       figaro_tmp   = "figaro-#{figaro_stage}"
 
@@ -37,8 +37,8 @@ namespace :figaro do
     Symlink the application config to the release_path
   DESC
   task :symlink do
-    on roles(:app) do
-      execute :ln, "-sf #{fetch(:figaro_target)} #{fetch(:figaro_config)}"
+    on roles(fetch(:figaro_roles)) do
+      execute :ln, '-sf', fetch(:figaro_target), fetch(:figaro_config)
     end
   end
 end
@@ -48,6 +48,7 @@ namespace :load do
     set :figaro_target, -> { shared_path.join('application.yml') }
     set :figaro_config, -> { release_path.join('config', 'application.yml') }
     set :figaro_to_env, false
+    set :figaro_roles, :app
   end
 end
 

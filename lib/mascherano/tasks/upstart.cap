@@ -13,21 +13,21 @@ end
 namespace :upstart do
   desc "Start the application services"
   task :start do
-    on roles(:app) do
+    on roles(fetch(:upstart_roles)) do
       build_and_execute_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
     end
   end
 
   desc "Stop the application services"
   task :stop do
-    on roles(:app) do
+    on roles(fetch(:upstart_roles)) do
       build_and_execute_cmd(fetch(:upstart_service), 'stop', fetch(:upstart_sudo))
     end
   end
 
   desc "Restart the application services"
   task :restart do
-    on roles(:app) do
+    on roles(fetch(:upstart_roles)) do
       cmd_sq  = build_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
       cmd_sq += ' || '
       cmd_sq += build_cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
@@ -41,6 +41,7 @@ namespace :load do
   task :defaults do
     set :upstart_service, -> { fetch(:application) }
     set :upstart_sudo, false
+    set :upstart_roles, :app
   end
 end
 

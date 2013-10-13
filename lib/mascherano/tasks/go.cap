@@ -7,23 +7,22 @@ namespace :go do
     set :go_input,  "api.go"
     set :go_output, "api"
     set :go_target, -> { release_path.join(fetch(:go_output)) }
+    set :go_roles, :app
   DESC
   task :build do
-    on roles(:app) do
+    on roles(fetch(:go_roles)) do
       run_locally do
-        execute :go, "build -o #{fetch(:go_output)} #{fetch(:go_input)}"
+        execute :go, 'build', '-o', fetch(:go_output), fetch(:go_input)
       end
     end
   end
 
-  desc <<-DESC
-    Upload compiled application to the server
-  DESC
+  desc 'Upload compiled application to the server'
   task :upload do
-    on roles(:app) do
+    on roles(fetch(:go_roles)) do
       go_output = fetch(:go_output)
       go_target = fetch(:go_target_path).join(go_output)
-      upload! go_output, go_target, via: :scp
+      upload! go_output, go_target
     end
   end
 end
@@ -33,5 +32,6 @@ namespace :load do
     set :go_input,  "api.go"
     set :go_output, "api"
     set :go_target_path, -> { release_path }
+    set :go_roles, :app
   end
 end

@@ -15,10 +15,11 @@ namespace :foreman do
     set :foreman_pids,        -> { shared_path.join('pids') }
     set :foreman_concurrency, false
     set :foreman_sudo,        false
+    set :foreman_roles,       :all
   DESC
 
   task :export do
-    on roles(:all) do
+    on roles(fetch(:foreman_roles)) do
       within release_path do
         concurrency = fetch(:foreman_concurrency)
         sudo        = fetch(:foreman_sudo)
@@ -58,6 +59,7 @@ namespace :load do
     set :foreman_pids,        -> { shared_path.join('pids') }
     set :foreman_concurrency, false
     set :foreman_sudo,        false
+    set :foreman_roles,       :all
   end
 end
 
