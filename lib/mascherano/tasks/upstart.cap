@@ -1,31 +1,38 @@
-def cmd(service_name, action, sudo = false)
-  sudo_cmd = sudo ? 'sudo ' : ''
-  "#{sudo_cmd} service #{service_name} #{action}"
+def execute_cmd(cmd, sudo = false)
+  sudo ? sudo(cmd) : execute(cmd)
+end
+
+def build_cmd(service_name, action)
+  "service #{service_name} #{action}"
+end
+
+def build_and_execute_cmd(service_name, action, sudo = false)
+  execute_cmd(build_cmd(service_name, action))
 end
 
 namespace :upstart do
   desc "Start the application services"
   task :start do
     on roles(:app) do
-      execute cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
+      build_and_execute_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
     end
   end
 
   desc "Stop the application services"
   task :stop do
     on roles(:app) do
-      execute cmd(fetch(:upstart_service), 'stop', fetch(:upstart_sudo))
+      build_and_execute_cmd(fetch(:upstart_service), 'stop', fetch(:upstart_sudo))
     end
   end
 
   desc "Restart the application services"
   task :restart do
     on roles(:app) do
-      cmd_sq  = cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
+      cmd_sq  = build_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
       cmd_sq += ' || '
-      cmd_sq += cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
+      cmd_sq += build_cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
 
-      execute cmd_sq
+      execute_cmd(cmd_sq)
     end
   end
 end

@@ -1,0 +1,29 @@
+require 'securerandom'
+require 'stringio'
+
+def generate_token(n)
+  SecureRandom.hex(n)
+end
+
+namespace :token do
+  desc 'Generate random token'
+  task :generate do
+    on roles(:app) do
+      info generate_token(fetch(:token_length))
+    end
+  end
+
+  desc 'Upload random token as a file on remote server'
+  task :upload do
+    io = StringIO.new(generate_token(fetch(:token_length)))
+    upload! io, fetch(:token_target)
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :token_length, 64
+    set :token_target, -> { shared_path.join('.token') }
+  end
+end
+
