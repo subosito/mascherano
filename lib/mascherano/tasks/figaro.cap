@@ -1,3 +1,5 @@
+require 'stringio'
+
 namespace :figaro do
   desc <<-DESC
     Upload application config to the server
@@ -20,13 +22,13 @@ namespace :figaro do
           figaro_cmd = %Q(Figaro.env("#{figaro_stage}").to_yaml)
         end
 
-        execute :bundle, "exec rails runner 'puts #{figaro_cmd}' > #{figaro_tmp}"
-      end
+        figaro_data = StringIO.new
 
-      upload! figaro_tmp, fetch(:figaro_target), via: :scp
+        capture_output figaro_data do
+          execute :bundle, "exec rails runner 'puts #{figaro_cmd}'"
+        end
 
-      run_locally do
-        execute :rm, figaro_tmp
+        upload! figaro_data, fetch(:figaro_target), via: :scp
       end
     end
   end
