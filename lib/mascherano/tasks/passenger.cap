@@ -1,0 +1,42 @@
+namespace :passenger do
+  desc 'Start passenger'
+  task :start do
+    on roles(fetch(:passenger_roles)) do
+      within current_path do
+        execute fetch(:passenger_cmd), 'start', '-e', fetch(:passenger_env), '-p', fetch(:passenger_port), '-d'
+      end
+    end
+  end
+
+  desc 'Stop passenger'
+  task :stop do
+    on roles(fetch(:passenger_roles)) do
+      within current_path do
+        execute fetch(:passenger_cmd), 'stop', '-p', fetch(:passenger_port)
+      end
+    end
+  end
+
+  desc 'Restart passenger'
+  task :restart do
+    on roles(fetch(:passenger_roles)) do
+      within current_path do
+        if test " [ -f tmp/pids/passenger.#{fetch(:passenger_port)}.pid ] "
+          invoke 'passenger:stop'
+        end
+
+        invoke 'passenger:start'
+      end
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :passenger_cmd,   'bundle exec passenger'
+    set :passenger_env,   -> { fetch(:stage) }
+    set :passenger_port,  9292
+    set :passenger_roles, :app
+  end
+end
+

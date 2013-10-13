@@ -35,6 +35,8 @@ Mascherano currently have several recipes:
 | __figaro__     | Manage configuration, usually `application.yml` for [Figaro](https://github.com/laserlemon/figaro)    |
 | __go__         | Manage and ability to deploy go application                                                           |
 | __upstart__    | Manage application management using Upstart                                                           |
+| __token__      | Manage and generate random secret token                                                               |
+| __passenger__  | Manage Pushion Passenger based application                                                            |
 | _more to come_ | _pull request are welcome ;)_                                                                         |
 
 This package also provides a `noscm` recipe for when you don't need source code on your deployment box (usually application already compiled).
