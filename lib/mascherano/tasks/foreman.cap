@@ -12,6 +12,7 @@ namespace :foreman do
     set :foreman_app,         -> { fetch(:application) }
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
+    set :foreman_pids,        -> { shared_path.join('pids') }
     set :foreman_concurrency, false
     set :foreman_sudo,        false
   DESC
@@ -29,6 +30,7 @@ namespace :foreman do
         args << %Q(-a #{fetch(:foreman_app)})
         args << %Q(-u #{fetch(:foreman_user)})
         args << %Q(-l #{fetch(:foreman_log)})
+        args << %Q(-r #{fetch(:foreman_pids)})
         args << %Q(-c #{concurrency}) if concurrency
 
         cmd = "foreman export #{args.join(' ')}"
@@ -53,6 +55,7 @@ namespace :load do
     set :foreman_app,         -> { fetch(:application) }
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
+    set :foreman_pids,        -> { shared_path.join('pids') }
     set :foreman_concurrency, false
     set :foreman_sudo,        false
   end
