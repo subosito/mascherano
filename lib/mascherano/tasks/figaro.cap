@@ -28,7 +28,7 @@ namespace :figaro do
           execute :bundle, "exec rails runner 'puts #{figaro_cmd}'"
         end
 
-        upload! figaro_data, fetch(:figaro_target), via: :scp
+        upload! figaro_data, fetch(:figaro_target)
       end
     end
   end
