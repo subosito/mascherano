@@ -11,24 +11,24 @@ namespace :figaro do
     set :figaro_to_env, false
   DESC
   task :upload do
-    on roles(fetch(:figaro_roles)) do
+    figaro_data = nil
+
+    run_locally do
       figaro_stage = fetch(:stage)
       figaro_tmp   = "figaro-#{figaro_stage}"
 
-      run_locally do
-        if fetch(:figaro_to_env)
-          figaro_cmd = %Q(Figaro.vars("#{figaro_stage}").split)
-        else
-          figaro_cmd = %Q(Figaro.env("#{figaro_stage}").to_yaml)
-        end
+      if fetch(:figaro_to_env)
+        figaro_cmd = %Q(Figaro.vars("#{figaro_stage}").split)
+      else
+        figaro_cmd = %Q(Figaro.env("#{figaro_stage}").to_yaml)
+      end
 
-        figaro_data = StringIO.new
+      figaro_data = execute(:rails, "runner 'puts #{figaro_cmd}'").stdout
+    end
 
-        capture_output figaro_data do
-          execute :bundle, "exec rails runner 'puts #{figaro_cmd}'"
-        end
-
-        upload! figaro_data, fetch(:figaro_target)
+    if figaro_data
+      on roles(fetch(:figaro_roles)) do
+        upload! StringIO.new(figaro_data), fetch(:figaro_target)
       end
     end
   end

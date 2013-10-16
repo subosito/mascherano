@@ -28,11 +28,11 @@ namespace :upstart do
   desc "Restart the application services"
   task :restart do
     on roles(fetch(:upstart_roles)) do
-      cmd_sq  = build_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
+      cmd_sq  = build_cmd(fetch(:upstart_service), 'start')
       cmd_sq += ' || '
-      cmd_sq += build_cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
+      cmd_sq += build_cmd(fetch(:upstart_service), 'restart')
 
-      execute_cmd(cmd_sq)
+      execute_cmd(cmd_sq, fetch(:upstart_sudo))
     end
   end
 end
