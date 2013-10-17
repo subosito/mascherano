@@ -4,6 +4,7 @@ namespace :foreman do
 
     You can override any of these defaults by setting the variables shown below.
 
+    set :foreman_cmd,         "foreman"
     set :foreman_format,      "upstart"
     set :foreman_location,    "/etc/init"
     set :foreman_port,        5000
@@ -21,8 +22,9 @@ namespace :foreman do
   task :export do
     on roles(fetch(:foreman_roles)) do
       within release_path do
-        concurrency = fetch(:foreman_concurrency)
-        sudo        = fetch(:foreman_sudo)
+        concurrency  = fetch(:foreman_concurrency)
+        foreman_sudo = fetch(:foreman_sudo)
+        foreman_pids = fetch(:foreman_pids)
 
         args  = [fetch(:foreman_format), fetch(:foreman_location)]
         args << %Q(-f #{fetch(:foreman_procfile)})
@@ -31,12 +33,12 @@ namespace :foreman do
         args << %Q(-a #{fetch(:foreman_app)})
         args << %Q(-u #{fetch(:foreman_user)})
         args << %Q(-l #{fetch(:foreman_log)})
-        args << %Q(-r #{fetch(:foreman_pids)})
+        args << %Q(-r #{fetch(:foreman_pids)}) if foreman_pids
         args << %Q(-c #{concurrency}) if concurrency
 
-        cmd = "foreman export #{args.join(' ')}"
+        cmd = "#{fetch(:foreman_cmd)} export #{args.join(' ')}"
 
-        if sudo
+        if foreman_sudo
           execute "sudo su - -c '#{cmd}'"
         else
           execute cmd
@@ -48,6 +50,7 @@ end
 
 namespace :load do
   task :defaults do
+    set :foreman_cmd,         "foreman"
     set :foreman_format,      "upstart"
     set :foreman_location,    "/etc/init"
     set :foreman_port,        5000
