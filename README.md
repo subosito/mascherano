@@ -37,6 +37,7 @@ Mascherano currently have several recipes:
 | __upstart__    | Manage application management using Upstart                                                           |
 | __token__      | Manage and generate random secret token                                                               |
 | __passenger__  | Manage Pushion Passenger based application                                                            |
+| __auth_basic__ | Manage and generate HTTP basic authentication `.htpasswd`                                             |
 | _more to come_ | _pull request are welcome ;)_                                                                         |
 
 This package also provides a `noscm` recipe for when you don't need source code on your deployment box (usually application already compiled).

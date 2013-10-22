@@ -1,0 +1,26 @@
+namespace :auth_basic do
+  desc 'Generate HTTP basic authentication'
+  task :generate do
+    puts "Please type the password for HTTP basic authentication, press ENTER when you're finished:"
+    passwd   = $stdin.gets.chomp
+    htpasswd = nil
+
+    run_locally do
+      htpasswd = execute(:htpasswd, '-nb', fetch(:auth_basic_user), passwd).stdout
+      htpasswd.chomp!
+    end
+
+    on roles(fetch(:auth_basic_roles)) do
+      upload! StringIO.new(htpasswd), fetch(:auth_basic_target)
+      execute :chmod, 'o+r', fetch(:auth_basic_target)
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :auth_basic_user, 'root'
+    set :auth_basic_roles, :all
+    set :auth_basic_target, -> { shared_path.join('.htpasswd') }
+  end
+end
