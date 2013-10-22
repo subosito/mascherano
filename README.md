@@ -44,7 +44,6 @@ This package also provides a `noscm` recipe for when you don't need source code 
 
 ```ruby
 # deploy.rb
-set :application, 'mascherano'
 set :scm, :noscm
 ```
 ## Usage
@@ -53,10 +52,13 @@ Make sure you have `Capfile` in the root of your project, so you can add these l
 
 ```ruby
 require 'mascherano/env'
-require 'mascherano/figaro'
 require 'mascherano/foreman'
+require 'mascherano/figaro'
 require 'mascherano/go'
 require 'mascherano/upstart'
+require 'mascherano/token'
+require 'mascherano/passenger'
+require 'mascherano/auth_basic'
 ```
 
 Then on `config/deploy/{env}.rb` you can customize the options:
@@ -64,6 +66,7 @@ Then on `config/deploy/{env}.rb` you can customize the options:
 ```ruby
 set :env_file, '.staging.env'
 set :foreman_procfile, -> { release_path.join('procfiles', 'staging') }
+set :foreman_pids, -> { shared_path.join('pids') }
 ```
 
 See the `lib/mascherano/task/*.cap` for more options.

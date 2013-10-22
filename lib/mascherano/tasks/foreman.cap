@@ -13,7 +13,7 @@ namespace :foreman do
     set :foreman_app,         -> { fetch(:application) }
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
-    set :foreman_pids,        -> { shared_path.join('pids') }
+    set :foreman_pids,        false
     set :foreman_concurrency, false
     set :foreman_sudo,        false
     set :foreman_roles,       :all
@@ -59,7 +59,7 @@ namespace :load do
     set :foreman_app,         -> { fetch(:application) }
     set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
-    set :foreman_pids,        -> { shared_path.join('pids') }
+    set :foreman_pids,        false
     set :foreman_concurrency, false
     set :foreman_sudo,        false
     set :foreman_roles,       :all
