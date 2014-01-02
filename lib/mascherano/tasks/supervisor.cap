@@ -1,0 +1,94 @@
+require 'figaro'
+require 'erb'
+require 'pry'
+
+class SupervisorConf < OpenStruct
+  def render(template)
+    ERB.new(template).result(binding)
+  end
+
+  def render_file(template_file)
+    render(File.read(template_file))
+  end
+
+  def env_pair
+    self.marshal_dump.map { |key, val| %Q[#{key}="#{val}"] }.join(",\n  ")
+  end
+end
+
+namespace :supervisor do
+  desc 'Export supervisor configuration'
+  task :export do
+    supervisor_config = nil
+
+    run_locally do
+      figaro_cmd  = %Q(Figaro.env("#{fetch(:supervisor_stage)}").to_yaml)
+      figaro_data = capture(:rails, "runner 'puts #{figaro_cmd}'")
+      data = YAML.load(figaro_data)
+
+      template = SupervisorConf.new(data)
+      supervisor_config = template.render_file(fetch(:supervisor_template))
+    end
+
+    if supervisor_config
+      on roles(fetch(:supervisor_roles)) do
+        upload! StringIO.new(supervisor_config), fetch(:supervisor_target)
+      end
+    end
+  end
+
+  desc 'Symlink supervisord config to the conf.d'
+  task :symlink do
+    on roles(fetch(:supervisor_roles)) do
+      execute :ln, '-sf', fetch(:supervisor_target), fetch(:supervisor_confd)
+    end
+  end
+
+  desc 'Reread supervisord'
+  task :reread do
+    on roles(fetch(:supervisor_roles)) do
+      execute :supervisorctl, 'reread'
+    end
+  end
+
+  desc 'Update supervisord'
+  task :update do
+    on roles(fetch(:supervisor_roles)) do
+      execute :supervisorctl, 'update'
+    end
+  end
+
+  desc 'Restart application'
+  task :restart do
+    on roles(fetch(:supervisor_roles)) do
+      execute :supervisorctl, 'restart', "#{fetch(:supervisor_application)}:*"
+    end
+  end
+
+  desc 'Update configuration or restart application'
+  task :refresh do
+    on roles(fetch(:supervisor_roles)) do
+      if test "supervisorctl reread | grep 'No config updates to processes'"
+        execute :supervisorctl, 'restart', "#{fetch(:supervisor_application)}:*"
+      else
+        execute :supervisorctl, 'update'
+      end
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+    set :supervisor_application, -> { fetch(:application) }
+    set :supervisor_stage,       -> { fetch(:stage) }
+    set :supervisor_template,    -> { "config/supervisor/#{fetch(:supervisor_stage)}.conf" }
+    set :supervisor_target,      -> { shared_path.join('supervisord.conf') }
+    set :supervisor_confd,       -> { "/etc/supervisor/conf.d/#{fetch(:supervisor_application)}.conf" }
+    set :supervisor_roles,       :all
+  end
+end
+
+namespace :deploy do
+  after :updating,   'supervisor:symlink'
+  after :publishing, 'supervisor:refresh'
+end

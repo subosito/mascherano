@@ -38,6 +38,7 @@ Mascherano currently have several recipes:
 | __token__      | Manage and generate random secret token                                                               |
 | __passenger__  | Manage Pushion Passenger based application                                                            |
 | __auth_basic__ | Manage and generate HTTP basic authentication `.htpasswd`                                             |
+| __supervisor__ | Manage applications through supervisor process manager                                                |
 | _more to come_ | _pull request are welcome ;)_                                                                         |
 
 This package also provides a `noscm` recipe for when you don't need source code on your deployment box (usually application already compiled).
@@ -59,6 +60,7 @@ require 'mascherano/upstart'
 require 'mascherano/token'
 require 'mascherano/passenger'
 require 'mascherano/auth_basic'
+require 'mascherano/supervisor'
 ```
 
 Then on `config/deploy/{env}.rb` you can customize the options:
