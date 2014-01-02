@@ -6,7 +6,7 @@ namespace :auth_basic do
     htpasswd = nil
 
     run_locally do
-      htpasswd = execute(:htpasswd, '-nb', fetch(:auth_basic_user), passwd).stdout
+      htpasswd = capture(:htpasswd, '-nb', fetch(:auth_basic_user), passwd)
       htpasswd.chomp!
     end
 

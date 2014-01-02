@@ -23,7 +23,7 @@ namespace :figaro do
         figaro_cmd = %Q(Figaro.env("#{figaro_stage}").to_yaml)
       end
 
-      figaro_data = execute(:rails, "runner 'puts #{figaro_cmd}'").stdout
+      figaro_data = capture(:rails, "runner 'puts #{figaro_cmd}'")
     end
 
     if figaro_data
