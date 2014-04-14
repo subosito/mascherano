@@ -11,7 +11,7 @@ namespace :foreman do
     set :foreman_root,        -> { release_path }
     set :foreman_procfile,    -> { release_path.join('Procfile') }
     set :foreman_app,         -> { fetch(:application) }
-    set :foreman_user,        -> { fetch(:user) }
+    set :foreman_user,        -> { host.user }
     set :foreman_log,         -> { shared_path.join('log') }
     set :foreman_pids,        false
     set :foreman_concurrency, false
@@ -20,7 +20,7 @@ namespace :foreman do
   DESC
 
   task :export do
-    on roles(fetch(:foreman_roles)) do
+    on roles(fetch(:foreman_roles)) do |host|
       within release_path do
         foreman_cmd         = fetch(:foreman_cmd)
         foreman_concurrency = fetch(:foreman_concurrency)
@@ -28,13 +28,14 @@ namespace :foreman do
         foreman_location    = fetch(:foreman_location)
         foreman_pids        = fetch(:foreman_pids)
         foreman_sudo        = fetch(:foreman_sudo)
+        foreman_user        = fetch(:foreman_user, host.user)
 
         cmd = [foreman_cmd, 'export',  foreman_format, foreman_location]
         cmd << %Q(-f #{fetch(:foreman_procfile)})
         cmd << %Q(-p #{fetch(:foreman_port)})
         cmd << %Q(-d #{fetch(:foreman_root)})
         cmd << %Q(-a #{fetch(:foreman_app)})
-        cmd << %Q(-u #{fetch(:foreman_user)})
+        cmd << %Q(-u #{foreman_user})
         cmd << %Q(-l #{fetch(:foreman_log)})
         cmd << %Q(-r #{foreman_pids}) if foreman_pids
         cmd << %Q(-c #{foreman_concurrency}) if foreman_concurrency
@@ -58,7 +59,6 @@ namespace :load do
     set :foreman_root,        -> { release_path }
     set :foreman_procfile,    -> { release_path.join('Procfile') }
     set :foreman_app,         -> { fetch(:application) }
-    set :foreman_user,        -> { fetch(:user) }
     set :foreman_log,         -> { shared_path.join('log') }
     set :foreman_pids,        false
     set :foreman_concurrency, false
