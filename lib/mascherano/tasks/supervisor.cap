@@ -31,7 +31,7 @@ namespace :supervisor do
     end
 
     if supervisor_config
-      on roles(fetch(:supervisor_roles)) do
+      on fetch(:supervisor_servers) do
         upload! StringIO.new(supervisor_config), fetch(:supervisor_target)
       end
     end
@@ -39,35 +39,35 @@ namespace :supervisor do
 
   desc 'Symlink supervisord config to the conf.d'
   task :symlink do
-    on roles(fetch(:supervisor_roles)) do
+    on fetch(:supervisor_servers) do
       execute :ln, '-sf', fetch(:supervisor_target), fetch(:supervisor_confd)
     end
   end
 
   desc 'Reread supervisord'
   task :reread do
-    on roles(fetch(:supervisor_roles)) do
+    on fetch(:supervisor_servers) do
       execute :supervisorctl, 'reread'
     end
   end
 
   desc 'Update supervisord'
   task :update do
-    on roles(fetch(:supervisor_roles)) do
+    on fetch(:supervisor_servers) do
       execute :supervisorctl, 'update'
     end
   end
 
   desc 'Restart application'
   task :restart do
-    on roles(fetch(:supervisor_roles)) do
+    on fetch(:supervisor_servers) do
       execute :supervisorctl, 'restart', "#{fetch(:supervisor_application)}:*"
     end
   end
 
   desc 'Update configuration or restart application'
   task :refresh do
-    on roles(fetch(:supervisor_roles)) do
+    on fetch(:supervisor_servers) do
       if test "supervisorctl reread | grep 'No config updates to processes'"
         execute :supervisorctl, 'restart', "#{fetch(:supervisor_application)}:*"
       else
@@ -79,12 +79,13 @@ end
 
 namespace :load do
   task :defaults do
-    set :supervisor_application, -> { fetch(:application) }
-    set :supervisor_stage,       -> { fetch(:stage) }
-    set :supervisor_template,    -> { "config/supervisor/#{fetch(:supervisor_stage)}.conf" }
-    set :supervisor_target,      -> { shared_path.join('supervisord.conf') }
-    set :supervisor_confd,       -> { "/etc/supervisor/conf.d/#{fetch(:supervisor_application)}.conf" }
-    set :supervisor_roles,       :all
+    set :supervisor_application,  -> { fetch(:application) }
+    set :supervisor_stage,        -> { fetch(:stage) }
+    set :supervisor_template,     -> { "config/supervisor/#{fetch(:supervisor_stage)}.conf" }
+    set :supervisor_target,       -> { shared_path.join('supervisord.conf') }
+    set :supervisor_confd,        -> { "/etc/supervisor/conf.d/#{fetch(:supervisor_application)}.conf" }
+    set :supervisor_roles,        :all
+    set :supervisor_servers,      -> { release_roles(fetch(:supervisor_roles)) }
   end
 end
 

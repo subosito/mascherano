@@ -4,15 +4,16 @@ namespace :go do
 
     You can override any of these defaults by setting the variables shown below.
 
-    set :go_input,  'api.go'
-    set :go_output, 'api'
-    set :go_os,     'linux'
-    set :go_arch,   'amd64'
-    set :go_roles,  :app
-    set :go_target, -> { release_path.join(fetch(:go_output)) }
+    set :go_input,    'api.go'
+    set :go_output,   'api'
+    set :go_os,       'linux'
+    set :go_arch,     'amd64'
+    set :go_roles,    :app
+    set :go_servers,  -> { release_roles(fetch(:go_roles)) }
+    set :go_target,   -> { release_path.join(fetch(:go_output)) }
   DESC
   task :build do
-    on roles(fetch(:go_roles)) do
+    on fetch(:go_servers) do
       run_locally do
         go_flags = {
           'GOOS'   => fetch(:go_os),
@@ -28,7 +29,7 @@ namespace :go do
 
   desc 'Upload compiled application to the server'
   task :upload do
-    on roles(fetch(:go_roles)) do
+    on fetch(:go_servers) do
       upload! fetch(:go_output), fetch(:go_target)
     end
   end
@@ -36,11 +37,12 @@ end
 
 namespace :load do
   task :defaults do
-    set :go_input,  'api.go'
-    set :go_output, 'api'
-    set :go_os,     'linux'
-    set :go_arch,   'amd64'
-    set :go_roles,  :app
-    set :go_target, -> { release_path.join(fetch(:go_output)) }
+    set :go_input,    'api.go'
+    set :go_output,   'api'
+    set :go_os,       'linux'
+    set :go_arch,     'amd64'
+    set :go_roles,    :app
+    set :go_servers,  -> { release_roles(fetch(:go_roles)) }
+    set :go_target,   -> { release_path.join(fetch(:go_output)) }
   end
 end

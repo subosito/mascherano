@@ -14,7 +14,7 @@ namespace :upstart do
 
   desc "Start the application services"
   task :start do
-    on roles(upstart_roles) do
+    on fetch(:upstart_servers) do
       as_configured_user do
         execute upstart_cmd, 'start', upstart_service
       end
@@ -23,7 +23,7 @@ namespace :upstart do
 
   desc "Stop the application services"
   task :stop do
-    on roles(upstart_roles) do
+    on fetch(:upstart_servers) do
       as_configured_user do
         execute upstart_cmd 'stop', upstart_service
       end
@@ -32,7 +32,7 @@ namespace :upstart do
 
   desc "Restart the application services"
   task :restart do
-    on roles(upstart_roles) do
+    on fetch(:upstart_servers) do
       as_configured_user do
         unless test(upstart_cmd, 'start', upstart_service)
           execute upstart_cmd, 'restart', upstart_service
@@ -44,10 +44,11 @@ end
 
 namespace :load do
   task :defaults do
-    set :upstart_service, -> { fetch(:application) }
-    set :upstart_sudo, false
-    set :upstart_roles, :app
-    set :upstart_cmd, 'initctl'
+    set :upstart_service,  -> { fetch(:application) }
+    set :upstart_sudo,     false
+    set :upstart_roles,    :app
+    set :upstart_servers,  -> { release_roles(fetch(:upstart_roles)) }
+    set :upstart_cmd,      'initctl'
   end
 end
 
