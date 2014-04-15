@@ -1,32 +1,43 @@
-def build_cmd(service_name, action, sudo = false)
-  cmd = "service #{service_name} #{action}"
-  cmd = "sudo " + cmd if sudo
-  cmd
-end
-
 namespace :upstart do
+
+  def as_configured_user
+    if fetch(:upstart_sudo)
+      as(:root) { yield }
+    else
+      yield
+    end
+  end
+
+  def upstart_cmd; fetch(:upstart_cmd) end
+  def upstart_roles; fetch(:upstart_roles) end
+  def upstart_service; fetch(:upstart_service) end
+
   desc "Start the application services"
   task :start do
-    on roles(fetch(:upstart_roles)) do
-      execute build_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
+    on roles(upstart_roles) do
+      as_configured_user do
+        execute upstart_cmd, 'start', upstart_service
+      end
     end
   end
 
   desc "Stop the application services"
   task :stop do
-    on roles(fetch(:upstart_roles)) do
-      execute build_cmd(fetch(:upstart_service), 'stop', fetch(:upstart_sudo))
+    on roles(upstart_roles) do
+      as_configured_user do
+        execute upstart_cmd 'stop', upstart_service
+      end
     end
   end
 
   desc "Restart the application services"
   task :restart do
-    on roles(fetch(:upstart_roles)) do
-      cmd_sq  = build_cmd(fetch(:upstart_service), 'start', fetch(:upstart_sudo))
-      cmd_sq += ' || '
-      cmd_sq += build_cmd(fetch(:upstart_service), 'restart', fetch(:upstart_sudo))
-
-      execute cmd_sq
+    on roles(upstart_roles) do
+      as_configured_user do
+        unless test(upstart_cmd, 'start', upstart_service)
+          execute upstart_cmd, 'restart', upstart_service
+        end
+      end
     end
   end
 end
@@ -36,6 +47,7 @@ namespace :load do
     set :upstart_service, -> { fetch(:application) }
     set :upstart_sudo, false
     set :upstart_roles, :app
+    set :upstart_cmd, 'initctl'
   end
 end
 
