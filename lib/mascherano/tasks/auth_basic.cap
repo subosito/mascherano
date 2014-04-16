@@ -10,7 +10,7 @@ namespace :auth_basic do
       htpasswd.chomp!
     end
 
-    on roles(fetch(:auth_basic_roles)) do
+    on fetch(:auth_basic_servers) do
       upload! StringIO.new(htpasswd), fetch(:auth_basic_target)
       execute :chmod, 'o+r', fetch(:auth_basic_target)
     end
@@ -19,8 +19,9 @@ end
 
 namespace :load do
   task :defaults do
-    set :auth_basic_user, 'root'
-    set :auth_basic_roles, :all
-    set :auth_basic_target, -> { shared_path.join('.htpasswd') }
+    set :auth_basic_user,     'root'
+    set :auth_basic_roles,    :all
+    set :auth_basic_servers,  -> { release_roles(fetch(:auth_basic_roles)) }
+    set :auth_basic_target,   -> { shared_path.join('.htpasswd') }
   end
 end

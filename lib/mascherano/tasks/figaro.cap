@@ -6,9 +6,11 @@ namespace :figaro do
 
     You can override any of these defaults by setting the variables shown below.
 
-    set :figaro_target, -> { shared_path.join('application.yml') }
-    set :figaro_config, -> { release_path.join('config', 'application.yml') }
-    set :figaro_to_env, false
+    set :figaro_target,   -> { shared_path.join('application.yml') }
+    set :figaro_config,   -> { release_path.join('config',            'application.yml') }
+    set :figaro_to_env,   false
+    set :figaro_roles,    :app
+    set :figaro_servers,  -> { release_roles(fetch(:figaro_roles)) }
   DESC
   task :upload do
     figaro_data = nil
@@ -27,7 +29,7 @@ namespace :figaro do
     end
 
     if figaro_data
-      on roles(fetch(:figaro_roles)) do
+      on fetch(:figaro_servers) do
         upload! StringIO.new(figaro_data), fetch(:figaro_target)
       end
     end
@@ -37,7 +39,7 @@ namespace :figaro do
     Symlink the application config to the release_path
   DESC
   task :symlink do
-    on roles(fetch(:figaro_roles)) do
+    on fetch(:figaro_servers) do
       execute :ln, '-sf', fetch(:figaro_target), fetch(:figaro_config)
     end
   end
@@ -45,10 +47,11 @@ end
 
 namespace :load do
   task :defaults do
-    set :figaro_target, -> { shared_path.join('application.yml') }
-    set :figaro_config, -> { release_path.join('config', 'application.yml') }
-    set :figaro_to_env, false
-    set :figaro_roles, :app
+    set :figaro_target,   -> { shared_path.join('application.yml') }
+    set :figaro_config,   -> { release_path.join('config',            'application.yml') }
+    set :figaro_to_env,   false
+    set :figaro_roles,    :app
+    set :figaro_servers,  -> { release_roles(fetch(:figaro_roles)) }
   end
 end
 

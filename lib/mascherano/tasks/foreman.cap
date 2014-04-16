@@ -4,23 +4,23 @@ namespace :foreman do
 
     You can override any of these defaults by setting the variables shown below.
 
-    set :foreman_cmd,         "foreman"
-    set :foreman_format,      "upstart"
-    set :foreman_location,    "/etc/init"
-    set :foreman_port,        5000
-    set :foreman_root,        -> { release_path }
-    set :foreman_procfile,    -> { release_path.join('Procfile') }
-    set :foreman_app,         -> { fetch(:application) }
-    set :foreman_user,        -> { host.user }
-    set :foreman_log,         -> { shared_path.join('log') }
-    set :foreman_pids,        false
-    set :foreman_concurrency, false
-    set :foreman_sudo,        false
-    set :foreman_roles,       :all
+    set :foreman_cmd,          "foreman"
+    set :foreman_format,       "upstart"
+    set :foreman_location,     "/etc/init"
+    set :foreman_port,         5000
+    set :foreman_root,         -> { release_path }
+    set :foreman_procfile,     -> { release_path.join('Procfile') }
+    set :foreman_app,          -> { fetch(:application) }
+    set :foreman_log,          -> { shared_path.join('log') }
+    set :foreman_pids,         false
+    set :foreman_concurrency,  false
+    set :foreman_sudo,         false
+    set :foreman_roles,        :all
+    set :foreman_servers,      -> { release_roles(fetch(:foreman_roles)) }
   DESC
 
   task :export do
-    on roles(fetch(:foreman_roles)) do |host|
+    on fetch(:foreman_servers) do |host|
       within release_path do
         foreman_cmd         = fetch(:foreman_cmd)
         foreman_concurrency = fetch(:foreman_concurrency)
@@ -52,18 +52,19 @@ end
 
 namespace :load do
   task :defaults do
-    set :foreman_cmd,         "foreman"
-    set :foreman_format,      "upstart"
-    set :foreman_location,    "/etc/init"
-    set :foreman_port,        5000
-    set :foreman_root,        -> { release_path }
-    set :foreman_procfile,    -> { release_path.join('Procfile') }
-    set :foreman_app,         -> { fetch(:application) }
-    set :foreman_log,         -> { shared_path.join('log') }
-    set :foreman_pids,        false
-    set :foreman_concurrency, false
-    set :foreman_sudo,        false
-    set :foreman_roles,       :all
+    set :foreman_cmd,          "foreman"
+    set :foreman_format,       "upstart"
+    set :foreman_location,     "/etc/init"
+    set :foreman_port,         5000
+    set :foreman_root,         -> { release_path }
+    set :foreman_procfile,     -> { release_path.join('Procfile') }
+    set :foreman_app,          -> { fetch(:application) }
+    set :foreman_log,          -> { shared_path.join('log') }
+    set :foreman_pids,         false
+    set :foreman_concurrency,  false
+    set :foreman_sudo,         false
+    set :foreman_roles,        :all
+    set :foreman_servers,      -> { release_roles(fetch(:foreman_roles)) }
   end
 end
 
