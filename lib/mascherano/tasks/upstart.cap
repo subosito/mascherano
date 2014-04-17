@@ -1,45 +1,38 @@
 namespace :upstart do
-
-  def as_configured_user
-    if fetch(:upstart_sudo)
-      as(:root) { yield }
-    else
-      yield
-    end
-  end
-
-  def upstart_cmd; fetch(:upstart_cmd) end
-  def upstart_roles; fetch(:upstart_roles) end
-  def upstart_service; fetch(:upstart_service) end
-
   desc "Start the application services"
   task :start do
     on fetch(:upstart_servers) do
-      as_configured_user do
-        execute upstart_cmd, 'start', upstart_service
-      end
+      execute fetch(:upstart_cmd), 'start', fetch(:upstart_service)
     end
   end
 
   desc "Stop the application services"
   task :stop do
     on fetch(:upstart_servers) do
-      as_configured_user do
-        execute upstart_cmd 'stop', upstart_service
-      end
+      execute fetch(:upstart_cmd), 'stop', fetch(:upstart_service)
     end
   end
 
   desc "Restart the application services"
   task :restart do
     on fetch(:upstart_servers) do
-      as_configured_user do
-        unless test(upstart_cmd, 'start', upstart_service)
-          execute upstart_cmd, 'restart', upstart_service
-        end
+      unless test(fetch(:upstart_cmd), 'start', fetch(:upstart_service))
+        execute fetch(:upstart_cmd), 'restart', fetch(:upstart_service)
       end
     end
   end
+
+  desc "Prefixes the upstart command with sudo when :upstart_sudo => true"
+  task :configure_sudo do
+    if fetch(:upstart_sudo)
+      upstart_cmd = fetch(:upstart_cmd).to_s
+      SSHKit.config.command_map.prefix[upstart_cmd].push('sudo')
+    end
+  end
+end
+
+Capistrano::DSL.stages.each do |stage|
+  after stage, 'upstart:configure_sudo'
 end
 
 namespace :load do
