@@ -40,14 +40,22 @@ namespace :foreman do
         cmd << %Q(-r #{foreman_pids}) if foreman_pids
         cmd << %Q(-c #{foreman_concurrency}) if foreman_concurrency
 
-        if foreman_sudo
-          as(:root) { execute *cmd }
-        else
-          execute *cmd
-        end
+        execute *cmd
       end
     end
   end
+
+  desc 'Prefixes the foreman command with sudo when :foreman_sudo => true'
+  task :configure_sudo do
+    if fetch(:foreman_sudo)
+      foreman_cmd = fetch(:foreman_cmd).to_s
+      SSHKit.config.command_map.prefix[foreman_cmd].push('sudo')
+    end
+  end
+end
+
+Capistrano::DSL.stages.each do |stage|
+  after stage, 'foreman:configure_sudo'
 end
 
 namespace :load do
